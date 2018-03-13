@@ -30,7 +30,7 @@ int main()
 	int *p = arr;
 	int *q = arr + n - 1;
 	while (p < q) {
-		while (*p + *q > c)
+		while (*p + *q > c) // !!! 严重错误，此while循环会导致q<p
 			--q;
 		if (c == (*p + *q))
 			cout << *p << ' ' << *q << endl;
