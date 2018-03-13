@@ -1,56 +1,65 @@
-// 问题 C: 任意两数之和是否等于给定数
-//题目描述
-//给定一个 int 数组 arr，元素按照升序排列且各不相同。另外有一个目标数 c，请你找出 arr 中所有的数对 a, b，使得 a + b = c。
-//输入
-//输入为三行，第一行为 arr 的元素个数，第二行为 arr，元素以空格分隔，第三行为目标数 c。
-//输出
-//所有符合条件的数对 a, b。a 和 b 以空格分开，每个数对占据一行。每行中 a < b，所有数对以它的第一个数（也就是 a 的值）升序排列。
-//	样例输入
-//	9
-//	- 2 0 1 2 3 5 6 8 10
-//	8
-//	样例输出
-//	- 2 10
-//	0 8
-//	2 6
-//	3 5
+// Swapping array elements
 
 #include "stdafx.h"
 #include <iostream>
-#include <algorithm>
-#include <ctime>
 using namespace std;
+
+int Times = 0;
+int Times2 = 0;
+void swapArray(int *, int, int);	// Reculsion: linear times
+void Swap(int &a, int &b) {	// O(1) space
+	++Times2;
+	int temp = a;
+	a = b;
+	b = temp;
+}
 
 int main()
 {
-	srand(time(NULL));
-
-	int n;	cin >> n;
+	int n; cin >> n;
 	int *arr = new int[n];
 	for (int i = 0; i < n; ++i) {
-		cin >> arr[i];
-//		arr[i] = (rand()%1000)-500;
+		arr[i] = i + 1;
 	}
-	//sort(arr, arr + n);
-	//for (int i = 0; i < n; ++i)
-	//	cout << arr[i] << ' ';
-	//cout << endl;
+	int pos; cin >> pos;
+	swapArray(arr, n, pos);
 
-	int c;	cin >> c;
-	int *p = arr;
-	int *q = arr + n - 1;
-	while (p < q) {
-		if (*p + *q > c)
-			--q;
-		else if (c == (*p + *q)) {
-			cout << *p << ' ' << *q << endl;
-			++p;
-		}
-		else
-			++p;
-	}
-	delete[]arr;
+	// Evaluation: suppose input is 1 to n, err denotes the deviation between arr and correct answer.
+	int *err = new int[n];
+	for (int i = 0; i < n - pos; ++i)
+		err[i] = pos + i + 1 - arr[i];
+	for (int i = 0; i < pos; ++i)
+		err[n - pos + i] = i + 1 - arr[n - pos + i];
+
+	for (int i = 0; i < n; ++i)
+		cout << err[i] << ' ';
+	cout << endl;
+	cout << Times << ' ' << Times2 << endl;
 	system("pause");
 	return 0;
+}
+
+void swapArray(int *arr, int n, int pos)
+{
+	++Times;
+	if (!pos || n == 1) // pos=0 && n>1 is possible.
+		return;
+	if (n - pos > pos) {
+
+		for (int i = 0; i < pos; ++i)
+			Swap(arr[i], arr[n - pos + i]);
+		//for (int i = 0; i < n; ++i)
+		//	cout << arr[i];
+		//cout << endl;
+		swapArray(arr, n - pos, pos);
+	}
+	else {
+		for (int i = 0; i < n - pos; ++i)
+			Swap(arr[i], arr[pos + i]);
+		//for (int i = 0; i < n; ++i)
+		//	cout << arr[i];
+		//cout << endl;
+		swapArray(arr + n - pos, pos, 2 * pos - n);
+	}
 }
 
