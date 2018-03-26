@@ -55,15 +55,19 @@ int main()
 	for (int i = 0; i < n - pointer; ++i)
 		arr.pop_back();
 
-	int Max = 0, tempMax = 0, i = 0;
+
 	if (arr.size() != 0 && arr[arr.size() - 1] < 0)
 		arr.pop_back();
-
-	//for (auto it = arr.cbegin(); it != arr.cend(); ++it)
-	//	std::cout << *it << ' ';
+	if (arr[0] < 0)
+		arr.erase(arr.begin());
 
 	n = arr.size();
-	while (i < n)
+
+	//for (auto it = arr.cbegin(); it != arr.cend(); ++it) {
+	//	cout << *it << ' ';
+	//}
+/*	int Max = 0, tempMax = 0, i = 0;
+	while (i < n) //Wrong Algorithm
 	{
 		if (i == 0 && arr[i] < 0) {
 			++i;
@@ -78,11 +82,32 @@ int main()
 		if (Max < tempMax)
 			Max = tempMax;
 		i += 2;
+	}	*/
+	int tempMax, Max = 0;
+	for (int i = 0; i < (n + 1) / 2; ++i) {
+		if (i == 0) {
+			Max = tempMax = arr[0];
+			continue;
+		}
+		if (tempMax + arr[i * 2 - 1] > 0){
+			tempMax += arr[i * 2 - 1];
+		}
+		else {
+			if (Max < tempMax)
+				Max = tempMax;
+			tempMax = 0;
+		}
+		tempMax += arr[i * 2];
 	}
+	if (Max < tempMax)
+		Max = tempMax;
+
 	if (n == 0 && bigNeg != INT32_MIN)
 		std::cout << bigNeg << endl;
 	else
 		std::cout << Max << endl;
+
+	arr.clear();
 
 	std::system("PAUSE");
 	return 0;
