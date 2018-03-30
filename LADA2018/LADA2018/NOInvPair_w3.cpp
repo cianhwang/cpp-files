@@ -38,7 +38,7 @@ void quickSort(string *, long);
 long partition(string *, string, long);
 void output(string *, long);
 
-// O(n*loglong(n))
+// O(n*log^2(n))
 int main()
 {
 	long n; // if told to use 'long', then use it.

@@ -1,6 +1,6 @@
 //问题 A: 最大子序列和问题
 
-//分治算法
+//分治算法 O(nlogn)
 
 #include "stdafx.h"
 #include <iostream>
