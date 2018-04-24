@@ -34,19 +34,19 @@
 #include <iostream>
 using namespace std;
 
-void fixMaxHeap(vector<int> &);
+void fixMaxHeap(vector<int> &); //add a new value in the rear;
 void fixMinHeap(vector<int> &);
-void fMaxH_HEAD(vector<int> &);
+void fMaxH_HEAD(vector<int> &); //adjust from the top;
 void fMinH_HEAD(vector<int> &);
 int Max(int, int);
 int Min(int, int);
 void Swap(int &, int &);
 
-//structure: minHeap 
+//structure: minHeap(with top > median and other values > top)
 //				|
-//			 median
+//			  median
 //				|
-//			 maxHeap
+//			 maxHeap(with top = median and other values < top)
 int main()
 {
 	vector<int> maxHeap;
@@ -57,7 +57,7 @@ int main()
 		if (!maxHeap.size()) {
 			maxHeap.push_back(num);
 		}
-		else if (median - num > 0) {
+		else if (median - num > 0) { //new value should be placed in maxHeap.
 			if (maxHeap.size() > minHeap.size()) {
 				minHeap.push_back(maxHeap[0]); //push_head??
 				fixMinHeap(minHeap);
@@ -70,7 +70,7 @@ int main()
 				fixMaxHeap(maxHeap);
 			}
 		}
-		else {
+		else { // whether should be placed in maxHeap or minHeap
 			if (maxHeap.size() > minHeap.size()) {
 				minHeap.push_back(num);
 				fixMinHeap(minHeap);

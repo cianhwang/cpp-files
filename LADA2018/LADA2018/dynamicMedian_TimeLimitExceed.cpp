@@ -36,17 +36,7 @@ using namespace std;
 
 void fixMaxHeap(vector<int> &);
 void fixMinHeap(vector<int> &);
-void fMaxH_HEAD(vector<int> &);
-void fMinH_HEAD(vector<int> &);
-int Max(int, int);
-int Min(int, int);
-void Swap(int &, int &);
 
-//structure: minHeap 
-//				|
-//			 median
-//				|
-//			 maxHeap
 int main()
 {
 	vector<int> maxHeap;
@@ -62,8 +52,10 @@ int main()
 				minHeap.push_back(maxHeap[0]); //push_head??
 				fixMinHeap(minHeap);
 
-				maxHeap[0] = num;
-				fMaxH_HEAD(maxHeap);
+				maxHeap.erase(maxHeap.begin());
+				fixMaxHeap(maxHeap);
+				maxHeap.push_back(num);
+				fixMaxHeap(maxHeap);
 			}
 			else {
 				maxHeap.push_back(num);
@@ -80,8 +72,10 @@ int main()
 					maxHeap.push_back(minHeap[0]); //push_head??
 					fixMaxHeap(maxHeap);
 
-					minHeap[0] = num;
-					fMinH_HEAD(minHeap);
+					minHeap.erase(minHeap.begin());
+					fixMinHeap(minHeap);
+					minHeap.push_back(num);
+					fixMinHeap(minHeap);
 				}
 				else {
 					maxHeap.push_back(num);
@@ -96,25 +90,12 @@ int main()
 	return 0;
 }
 
-int Max(int a, int b) {
-	return (a > b) ? a : b;
-}
-
-int Min(int a, int b) {
-	return (a < b) ? a : b;
-}
-
-void Swap(int &a, int &b) {
-	int temp = a;
-	a = b;
-	b = temp;
-	return;
-}
-
 void fixMaxHeap(vector<int> &maxHeap) {
 	int n = maxHeap.size();
 	while (n > 1 && maxHeap[n - 1] > maxHeap[n / 2 - 1]) {
-		Swap(maxHeap[n - 1], maxHeap[n / 2 - 1]);
+		int temp = maxHeap[n - 1];
+		maxHeap[n - 1] = maxHeap[n / 2 - 1];
+		maxHeap[n / 2 - 1] = temp;
 		n = n / 2;
 	}
 }
@@ -122,41 +103,9 @@ void fixMaxHeap(vector<int> &maxHeap) {
 void fixMinHeap(vector<int> &minHeap) {
 	int n = minHeap.size();
 	while (n > 1 && minHeap[n - 1] < minHeap[n / 2 - 1]) {
-		Swap(minHeap[n - 1], minHeap[n / 2 - 1]);
+		int temp = minHeap[n - 1];
+		minHeap[n - 1] = minHeap[n / 2 - 1];
+		minHeap[n / 2 - 1] = temp;
 		n = n / 2;
-	}
-}
-
-void fMaxH_HEAD(vector<int> &maxHeap) {
-	int i = 0;
-	while (2 * i + 2 < maxHeap.size() && maxHeap[i] < Max(maxHeap[2 * i + 1], maxHeap[2 * i + 2])) {
-		if (maxHeap[2 * i + 1] < maxHeap[2 * i + 2]) {
-			Swap(maxHeap[i], maxHeap[2 * i + 2]);
-			i = 2 * i + 2;
-		}
-		else {
-			Swap(maxHeap[i], maxHeap[2 * i + 1]);
-			i = 2 * i + 1;
-		}
-	}
-	if (2 * i + 1 < maxHeap.size() && maxHeap[i] < maxHeap[2*i+1]) {
-		Swap(maxHeap[i], maxHeap[2 * i + 1]);
-	}
-}
-
-void fMinH_HEAD(vector<int> &minHeap) {
-	int i = 0;
-	while (2 * i + 2 < minHeap.size() && minHeap[i] > Min(minHeap[2 * i + 1], minHeap[2 * i + 2])) {
-		if (minHeap[2 * i + 1] > minHeap[2 * i + 2]) {
-			Swap(minHeap[i], minHeap[2 * i + 2]);
-			i = i * 2 + 2;
-		}
-		else {
-			Swap(minHeap[i], minHeap[2 * i + 1]);
-			i = i * 2 + 1;
-		}
-	}
-	if (2 * i + 1 < minHeap.size() && minHeap[i] > minHeap[2 * i + 1]) {
-		Swap(minHeap[i], minHeap[2 * i + 1]);
 	}
 }
