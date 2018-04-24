@@ -49,6 +49,9 @@ int maxSumSeq(int *arr, int n, int &head, int &rear) {
 	else {
 		head = head1; rear = rear1;
 	}
+
+	//indicate that the interval between rear1 and head2(+n/2) not simply
+	//add up. Inside elements may effectuate.
 	int tempMax = Max(Left, Right);
 	int tempLeftCross = Left, tempRightCross = Right;
 	for (int i = rear1; i < n / 2 + rear2; ++i) {
