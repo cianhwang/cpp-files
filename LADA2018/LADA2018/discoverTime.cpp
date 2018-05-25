@@ -1,4 +1,4 @@
-// 7 0 1 0 2 0 5 1 2 1 3 3 1 3 2 4 2 4 6 5 1 6 4 6 3 -- Slice 1
+// 7 0 1 0 2 0 5 1 2 1 3 3 1 3 2 4 2 4 6 5 0 6 4 6 3 -- Slice 1
 // 
 #include "stdafx.h"
 #include <iostream>
