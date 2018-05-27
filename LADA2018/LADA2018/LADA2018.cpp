@@ -1,74 +1,118 @@
+// MST
 #include "stdafx.h"
 #include <iostream>
 #include <vector>
-#include <queue>
-#include <string>
 using namespace std;
 
+class Edge {
+public:
+	int w;
+	int weight;
+};
 class Node {
 public:
-	vector<int> neighbors;
+	int v;
+	vector<Edge> neighbors;
+};
+class Graph {
+public:
+	Node *nodeList;
 };
 
-void BFSsweep(vector<Node> List, int n, int v, bool *twoColor);
-void BFS(vector<Node> List, char *color, int v, bool *twoColor, queue<int> &q);
+void primMST(Graph G, int n);
+void updateFringe(vector<int> pq, Graph G, int v, char *color);
+void Insert(vector<Edge> pq, int v, int weight);
+Edge getMin(vector<Edge> &pq); //get and delete
+int getPriority(vector<Edge> pq, int w);
+void decreaseKey(vector<Edge> pq, int w, int Wgt);
+
 
 int main()
 {
-	vector<Node> vec;
-	string str;
-	while (getline(cin, str)) {
-		Node Vertex;
-		for (auto i = 1; i < str.length(); ++i)
-			if (str[i] != ' ') {
-				Vertex.neighbors.push_back(str[i] - '0');
-			}
-		vec.push_back(Vertex);
-	}
-	int n = vec.size();
-	bool *twoColor = new bool[n];
-	BFSsweep(vec, n, 0, twoColor);
+	// input
+
 	// output
-	cout << "wo yi yue du guan yu chao xi de shuo ming" << endl;
-	for (int i = 0; i < n; ++i) {
-		if (twoColor[i])
-			cout << i << endl;
-	}
+
 	system("pause");
 	return 0;
 }
 
-void BFSsweep(vector<Node> List, int n, int v, bool *twoColor) {
+void primMST(Graph G, int n) {
+	vector<Edge> pq;
 	char *color = new char[n];
 	for (int i = 0; i < n; ++i) { color[i] = 'w'; }
-	queue<int> q;
-	for (int i = 0; i < n; ++i) {
-		if (color[(v + i) % n] == 'w')
-			BFS(List, color, v + i, twoColor, q);
+	int v = 0;
+	// add edge
+
+	Insert(pq, v, 0);
+	color[v] = 'g';
+	while (!pq.empty()) {
+		v = getMin(pq).w; // and deleteMin(pq);
+		// add edge
+
+		color[v] = 'b';
+		updateFringe(pq, G, v, color);
 	}
+}
+
+void updateFringe(vector<Edge> pq, Graph G, int v, char *color) {
+	vector<Edge> remAdj = G.nodeList[v].neighbors;
+	while (!remAdj.empty()) {
+		int w = remAdj.back().w;
+		int Wgt = remAdj.back().weight;
+		if (color[w] == 'w') {
+			// add edge
+
+			Insert(pq, w, Wgt);
+			color[w] = 'g';
+		}
+		else {
+			if (Wgt < getPriority(pq, w)) {
+				// revise edge
+				
+				decreaseKey(pq, w, Wgt);
+			}
+		}
+		remAdj.pop_back();
+	}
+}
+
+void Insert(vector<Edge> pq, int v, int weight) {
+	Edge e; e.w = v; e.weight = weight;
+	pq.push_back(e);
 	return;
 }
 
-void BFS(vector<Node> List, char *color, int v, bool *twoColor, queue<int> &q) {
-	vector<int> remAdj;
-	q.push(v);
-	// Pre Processing
-	twoColor[v] = true;
-	color[v] = 'g';
-	while (!q.empty()) {
-		int w = q.front(); q.pop();
-		remAdj = List[w].neighbors;
-		while (!remAdj.empty()) {
-			int x = remAdj.back();
-			if (color[x] == 'w') {
-				q.push(x); color[x] = 'g'; twoColor[x] = !(twoColor[w]);
-			}
-			//else if (color[x] == 'g') // MOST CRUCIAL PART!!!!
-			//	;
-			remAdj.pop_back();
+Edge getMin(vector<Edge> &pq) {
+	int Max = 0;
+	int wMax = 0;
+	int Idx = 0;
+	for (int i = 0; i < pq.size(); ++i) {
+		if (pq[i].weight > Max) {
+			Max = pq[i].weight;
+			wMax = pq[i].w;
+			Idx = i;
 		}
-		// Post Processing
-		color[w] = 'b';
 	}
-	return;
+	pq.erase(pq.begin() + Idx);
+	Edge e; e.w = wMax; e.weight = Max;
+	return e;
+}
+
+int getPriority(vector<Edge> pq, int w) {
+	int i;
+	for (i = 0; i < pq.size(); ++i) {
+		if (pq[i].w == w)
+			return pq[i].weight;
+	}
+}
+
+void decreaseKey(vector<Edge> pq, int w, int Wgt) {
+	int i;
+	for (i = 0; i < pq.size(); ++i) {
+		if (pq[i].w == w) {
+			pq[i].weight = Wgt;
+			return;
+		}
+	}
 }
