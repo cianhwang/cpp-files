@@ -1,134 +1,170 @@
-// Dijkstra
-//8 
-//0 1 2 0 2 7 0 3 1 0 5 3
-//1 3 2 1 4 5 1 5 1
-//2 3 8 2 6 2 2 7 4
-//3 4 7 3 6 4
-//4 5 3 4 6 3 4 7 4
-//5 7 6
-//6 7 5
-
+// 0 1 0 2 0 5 1 2 1 3 3 0 3 2 4 2 4 6 5 0 6 4 6 3 - Strong Connected Component
 #include "stdafx.h"
 #include <iostream>
 #include <vector>
+#include <stack>
+#include <string>
+#include <algorithm>
 using namespace std;
 
-class Edge {
-public:
-	int w;
-	int weight;
-};
 class Node {
 public:
-	vector<Edge> neighbors;
-};
-class Graph {
-public:
-	Node *nodeList;
+	vector<short> neighbors;
 };
 
-void Dijkstra(Graph G, int n, int v);
-void updateFringe(vector<Edge> &pq, Graph G, int v, int vWgt, char *color);
-void Insert(vector<Edge> &pq, int v, int weight);
-Edge getMin(vector<Edge> &pq); //get and delete
-int getPriority(vector<Edge> pq, int w);
-void decreaseKey(vector<Edge> &pq, int w, int Wgt);
-
+void DFSsweep(Node *List, short n, short v, stack<short> &s);
+void DFS(Node *List, char *color, short v, stack<short> &s);
+void DFSsweep2(Node *List, short n, short v, vector<short> &vec);
+void DFS2(Node *List, char *color, short v, vector<short> &vec);
+void DFSsweep3(Node *List, short n, short v, stack<short> &s, short &count);
+void DFS3(Node *List, char *color, short v, stack<short> &s, short &count);
 
 int main()
 {
-	// input
-	Graph G;
-	int n = 0; cin >> n;
-	G.nodeList = new Node[n];
-	int V, W, WEIGHT;
-
-	while (cin >> V >> W >> WEIGHT) {
-		Edge e1; e1.w = W; e1.weight = WEIGHT;
-		Edge e2; e2.w = V; e2.weight = WEIGHT;
-		G.nodeList[V].neighbors.push_back(e1);
-		G.nodeList[W].neighbors.push_back(e2);
+	vector<Node> *vec = new vector<Node>;
+	string str;
+	while (getline(cin, str)) {
+		Node *Vertex = new Node;
+		for (auto i = 0; i < str.length(); ++i)
+			if (str[i] != ' ') {
+				Vertex->neighbors.push_back(str[i] - '0');
+			}
+		vec->push_back(*Vertex);
+		delete Vertex;
 	}
-	int startPoint = 3;
-	Dijkstra(G, n, startPoint);
+	short n = vec->size();
+	Node *List = new Node[n];
+	for (short i = n - 1; i >= 0; --i) {
+		List[i].neighbors = vec->back().neighbors;
+		vec->pop_back();
+	}
+	delete vec;
+	Node *List2 = new Node[n];
+	for (short i = n - 1; i >= 0; --i) {
+		for (auto j = 0; j < List[i].neighbors.size(); ++j) {
+			List2[(List[i].neighbors[j])].neighbors.push_back(i);
+		}
+	}
+	cout << "I have read the rules about plagiarism punishment" << endl;
+	stack<short> s;
+	DFSsweep(List, n, 0, s);
+
+	short count = 0, Temp = 0;
+	vector<short> vec2;
+	while (!s.empty()) {
+		int v = s.top();
+		DFSsweep3(List, n, v, s, count);
+		if (count > Temp) {
+			DFSsweep2(List2, n, v, vec2);
+			Temp = count;
+		}
+	}
+	cout << Temp-1 << endl;
+	sort(vec2.begin(), vec2.end());
+	for (auto it = vec2.cbegin(); it != vec2.cend(); ++it) {
+		cout << *it << ' ';
+	}
 
 	system("pause");
 	return 0;
 }
 
-void Dijkstra(Graph G, int n, int v) {
-	vector<Edge> pq;
+void DFSsweep(Node *List, short n, short v, stack<short> &s) {
 	char *color = new char[n];
-	for (int i = 0; i < n; ++i) { color[i] = 'w'; }
-	int vWgt = 0;
-	Insert(pq, v, 0);
-	color[v] = 'g';
-	while (!pq.empty()) {
-		Edge e = getMin(pq); // and deleteMin(pq);
-		v = e.w; vWgt = e.weight;
-		// add edge
-		cout << v << ' ' << vWgt << endl;
-		color[v] = 'b';
-		updateFringe(pq, G, v, vWgt, color);
+	for (short i = 0; i < n; ++i) { color[i] = 'w'; }
+	for (short i = 0; i < n; ++i) {
+		if (color[(v + i) % n] == 'w')
+			DFS(List, color, v + i, s);
 	}
-}
-
-void updateFringe(vector<Edge> &pq, Graph G, int v, int vWgt, char *color) {
-	vector<Edge> remAdj = G.nodeList[v].neighbors;
-	while (!remAdj.empty()) {
-		int w = remAdj.back().w;
-		int wWgt = remAdj.back().weight + vWgt;
-		if (color[w] == 'w') {
-			// add edge
-			Insert(pq, w, wWgt);
-			color[w] = 'g';
-		}
-		else if (color[w] == 'g'){
-			if (wWgt < getPriority(pq, w)) {
-				// revise edge
-				decreaseKey(pq, w, wWgt);
-			}
-		}
-		remAdj.pop_back();
-	}
-}
-
-void Insert(vector<Edge> &pq, int v, int weight) {
-	Edge e; e.w = v; e.weight = weight;
-	pq.push_back(e);
 	return;
 }
 
-Edge getMin(vector<Edge> &pq) {
-	int Min = pq.front().weight;
-	int wMin = pq.front().w;
-	int Idx = 0;
-	for (int i = 0; i < pq.size(); ++i) {
-		if (pq[i].weight < Min) {
-			Min = pq[i].weight;
-			wMin = pq[i].w;
-			Idx = i;
+void DFS(Node *List, char *color, short v, stack<short> &s) {
+	short w;
+	vector<short> remAdj;
+	// Pre Processing
+
+	color[v] = 'g';
+	remAdj = List[v].neighbors;
+	while (remAdj.size() != 0) {
+		w = remAdj.front();
+		if (color[w] == 'w') {
+			DFS(List, color, w, s);
+			// backtrack
+
 		}
+		else {
+			;
+		}
+		remAdj.erase(remAdj.begin());
 	}
-	pq.erase(pq.begin() + Idx);
-	Edge e; e.w = wMin; e.weight = Min;
-	return e;
+	// Post Processing
+	s.push(v);
+	color[v] = 'b';
+	return;
 }
 
-int getPriority(vector<Edge> pq, int w) {
-	int i;
-	for (i = 0; i < pq.size(); ++i) {
-		if (pq[i].w == w)
-			return pq[i].weight;
-	}
+void DFSsweep2(Node *List, short n, short v, vector<short> &vec) {
+	char *color = new char[n];
+	for (short i = 0; i < n; ++i) { color[i] = 'w'; }
+
+	DFS2(List, color, v, vec);
+	return;
 }
 
-void decreaseKey(vector<Edge> &pq, int w, int Wgt) {
-	int i;
-	for (i = 0; i < pq.size(); ++i) {
-		if (pq[i].w == w) {
-			pq[i].weight = Wgt;
-			return;
+void DFS2(Node *List, char *color, short v, vector<short> &vec) {
+	short w;
+	vector<short> remAdj;
+	// Pre Processing
+	vec.push_back(v);
+	color[v] = 'g';
+	remAdj = List[v].neighbors;
+	while (remAdj.size() != 0) {
+		w = remAdj.front();
+		if (color[w] == 'w') {
+			DFS2(List, color, w, vec);
+			// backtrack
+
 		}
+		else {
+			;
+		}
+		remAdj.erase(remAdj.begin());
 	}
+	// Post Processing
+	color[v] = 'b';
+	return;
+}
+
+void DFSsweep3(Node *List, short n, short v, stack<short> &s, short &count) {
+	char *color = new char[n];
+	for (short i = 0; i < n; ++i) { color[i] = 'w'; }
+
+	DFS3(List, color, v, s, count);
+	return;
+}
+
+void DFS3(Node *List, char *color, short v, stack<short> &s, short &count) {
+	short w;
+	vector<short> remAdj;
+	// Pre Processing
+
+	color[v] = 'g';
+	remAdj = List[v].neighbors;
+	while (remAdj.size() != 0) {
+		w = remAdj.front();
+		if (color[w] == 'w') {
+			DFS3(List, color, w, s, count);
+			// backtrack
+
+		}
+		else {
+			;
+		}
+		remAdj.erase(remAdj.begin());
+	}
+	// Post Processing
+	s.pop(); ++count;
+	color[v] = 'b';
+	return;
 }
