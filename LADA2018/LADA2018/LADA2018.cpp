@@ -9,15 +9,14 @@ using namespace std;
 
 class Node {
 public:
-	vector<short> neighbors;
+	vector<int> neighbors;
 };
 
-void DFSsweep(Node *List, short n, short v, stack<short> &s);
-void DFS(Node *List, char *color, short v, stack<short> &s);
-void DFSsweep2(Node *List, short n, short v, vector<short> &vec);
-void DFS2(Node *List, char *color, short v, vector<short> &vec);
-void DFSsweep3(Node *List, short n, short v, stack<short> &s, short &count);
-void DFS3(Node *List, char *color, short v, stack<short> &s, short &count);
+void DFSsweep(Node *List, int n, int v, stack<int> &s);
+void DFS(Node *List, char *color, int v, stack<int> &s);
+void DFSsweep2(Node *List, int n, int v, stack<int> &s);
+void DFS2(Node *List, char *color, int v, stack<int> &s, vector<int> &vec);
+
 
 int main()
 {
@@ -32,60 +31,56 @@ int main()
 		vec->push_back(*Vertex);
 		delete Vertex;
 	}
-	short n = vec->size();
+	int n = vec->size();
 	Node *List = new Node[n];
-	for (short i = n - 1; i >= 0; --i) {
+	for (int i = n - 1; i >= 0; --i) {
 		List[i].neighbors = vec->back().neighbors;
 		vec->pop_back();
 	}
 	delete vec;
 	Node *List2 = new Node[n];
-	for (short i = n - 1; i >= 0; --i) {
+	for (int i = n - 1; i >= 0; --i) {
 		for (auto j = 0; j < List[i].neighbors.size(); ++j) {
 			List2[(List[i].neighbors[j])].neighbors.push_back(i);
 		}
 	}
-	cout << "I have read the rules about plagiarism punishment" << endl;
-	stack<short> s;
-	DFSsweep(List, n, 0, s);
 
-	short count = 0, Temp = 0;
-	vector<short> vec2;
-	while (!s.empty()) {
-		int v = s.top();
-		DFSsweep3(List, n, v, s, count);
-		if (count > Temp) {
-			DFSsweep2(List2, n, v, vec2);
-			Temp = count;
-		}
-	}
-	cout << Temp-1 << endl;
-	sort(vec2.begin(), vec2.end());
-	for (auto it = vec2.cbegin(); it != vec2.cend(); ++it) {
-		cout << *it << ' ';
-	}
+	//for (int i = 0; i < n; ++i) {
+	//	for (int j = 0; j < List2[i].neighbors.size(); ++j) {
+	//		cout << List2[i].neighbors[j] << ' ';
+	//	}
+	//	cout << endl;
+	//}
+	cout << "I have read the rules about plagiarism punishment" << endl;
+	stack<int> s;
+	DFSsweep(List, n, 0, s);
+	delete[]List;
+	cout << n - 1 << endl;
+
+	DFSsweep2(List2, n, s.top(), s);
 
 	system("pause");
 	return 0;
 }
 
-void DFSsweep(Node *List, short n, short v, stack<short> &s) {
+void DFSsweep(Node *List, int n, int v, stack<int> &s) {
 	char *color = new char[n];
-	for (short i = 0; i < n; ++i) { color[i] = 'w'; }
-	for (short i = 0; i < n; ++i) {
+	for (int i = 0; i < n; ++i) { color[i] = 'w'; }
+	for (int i = 0; i < n; ++i) {
 		if (color[(v + i) % n] == 'w')
 			DFS(List, color, v + i, s);
 	}
 	return;
 }
 
-void DFS(Node *List, char *color, short v, stack<short> &s) {
-	short w;
-	vector<short> remAdj;
+void DFS(Node *List, char *color, int v, stack<int> &s) {
+	int w;
+	vector<int> remAdj;
 	// Pre Processing
 
 	color[v] = 'g';
 	remAdj = List[v].neighbors;
+	int Max = 0;
 	while (remAdj.size() != 0) {
 		w = remAdj.front();
 		if (color[w] == 'w') {
@@ -104,17 +99,25 @@ void DFS(Node *List, char *color, short v, stack<short> &s) {
 	return;
 }
 
-void DFSsweep2(Node *List, short n, short v, vector<short> &vec) {
+void DFSsweep2(Node *List, int n, int v, stack<int> &s) {
 	char *color = new char[n];
-	for (short i = 0; i < n; ++i) { color[i] = 'w'; }
+	for (int i = 0; i < n; ++i) { color[i] = 'w'; }
 
-	DFS2(List, color, v, vec);
+	vector<int> vec;
+	//while (!s.empty()) {
+	DFS2(List, color, v, s, vec);
+	//	if (!s.empty())	v = s.top();
+	//}
+	sort(vec.begin(), vec.end());
+	for (auto it = vec.cbegin(); it != vec.cend(); ++it) {
+		cout << *it << ' ';
+	}
 	return;
 }
 
-void DFS2(Node *List, char *color, short v, vector<short> &vec) {
-	short w;
-	vector<short> remAdj;
+void DFS2(Node *List, char *color, int v, stack<int> &s, vector<int> &vec) {
+	int w;
+	vector<int> remAdj;
 	// Pre Processing
 	vec.push_back(v);
 	color[v] = 'g';
@@ -122,7 +125,7 @@ void DFS2(Node *List, char *color, short v, vector<short> &vec) {
 	while (remAdj.size() != 0) {
 		w = remAdj.front();
 		if (color[w] == 'w') {
-			DFS2(List, color, w, vec);
+			DFS2(List, color, w, s, vec);
 			// backtrack
 
 		}
@@ -132,39 +135,8 @@ void DFS2(Node *List, char *color, short v, vector<short> &vec) {
 		remAdj.erase(remAdj.begin());
 	}
 	// Post Processing
+	s.pop();
 	color[v] = 'b';
 	return;
 }
 
-void DFSsweep3(Node *List, short n, short v, stack<short> &s, short &count) {
-	char *color = new char[n];
-	for (short i = 0; i < n; ++i) { color[i] = 'w'; }
-
-	DFS3(List, color, v, s, count);
-	return;
-}
-
-void DFS3(Node *List, char *color, short v, stack<short> &s, short &count) {
-	short w;
-	vector<short> remAdj;
-	// Pre Processing
-
-	color[v] = 'g';
-	remAdj = List[v].neighbors;
-	while (remAdj.size() != 0) {
-		w = remAdj.front();
-		if (color[w] == 'w') {
-			DFS3(List, color, w, s, count);
-			// backtrack
-
-		}
-		else {
-			;
-		}
-		remAdj.erase(remAdj.begin());
-	}
-	// Post Processing
-	s.pop(); ++count;
-	color[v] = 'b';
-	return;
-}
