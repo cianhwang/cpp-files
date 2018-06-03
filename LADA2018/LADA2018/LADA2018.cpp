@@ -5,24 +5,25 @@
 #include <stack>
 #include <string>
 #include <algorithm>
+#include <sstream>
 using namespace std;
 
 class Node {
 public:
-	vector<short> neighbors;
+	vector<int> neighbors;
 };
 
 class Elem {
 public:
-	short count;
-	short index;
+	int count;
+	vector<int> index;
 };
 
-void DFSsweep(vector<Node> *List, short n, short v, stack<short> &s);
-void DFSsweep(vector<Node> *List, short n, short v, stack<short> &s, Elem &e);
-void DFSsweep2(vector<Node> *List, short n, short v);
-void DFS(vector<Node> *List, char *color, short v, stack<short> &s, bool inORout, short &count);
-void DFS2(vector<Node> *List, char *color, short v, vector<short> &vec);
+void DFSsweep(vector<Node> *List, int n, int v, stack<int> *s);
+void DFSsweep(vector<Node> *List, int n, int v, stack<int> *s, Elem &e);
+void DFSsweep2(vector<Node> *List, int n, int v, vector<int> &vec);
+void DFS(vector<Node> *List, char *color, int v, stack<int> *s, bool inORout, int &count);
+void DFS2(vector<Node> *List, char *color, int v, vector<int> &vec);
 
 int main()
 {
@@ -30,81 +31,84 @@ int main()
 	string str;
 	while (getline(cin, str)) {
 		Node Vertex;
-		for (auto i = 0; i < str.length(); ++i) {
-			if (str[i] != ' ') {
-				Vertex.neighbors.push_back(str[i] - '0');
-			}
+		istringstream is(str);
+		int aa = 0;
+		while (is >> aa) {
+			Vertex.neighbors.push_back(aa);
 		}
 		vec->push_back(Vertex);
 	}
-	short n = vec->size();
-	cout << "I have read the rules about plagiarism punishment" << endl;
-
-	stack<short> s;
-	DFSsweep(vec, n, 0, s);
-	Elem e;
-	DFSsweep(vec, n, s.top(), s, e);
-	cout << e.count - 1 << endl;
-
+	int n = vec->size();
 	vector<Node> *vec2 = new vector<Node>(n);
 	for (auto i = 0; i < vec->size(); ++i) {
-		vector<short> &vv = (*vec)[i].neighbors;
+		vector<int> &vv = (*vec)[i].neighbors;
 		while (!vv.empty()) {
 			(*vec2)[vv.back()].neighbors.push_back(i);
 			vv.pop_back();
 		}
 	}
-	delete vec;
-	DFSsweep2(vec2, n, e.index);
+	cout << "I have read the rules about plagiarism punishment" << endl;
 
+	stack<int> *s = new stack<int>;
+	DFSsweep(vec, n, 0, s);
+	Elem e;
+	DFSsweep(vec, n, s->top(), s, e);
+	cout << e.count - 1 << endl;
+
+	vector<int> vvv;
+	for (auto i = 0; i < e.index.size(); ++i)
+		DFSsweep2(vec2, n, e.index[i], vvv);
+	sort(vvv.begin(), vvv.end());
+	for (auto i = 0; i < vvv.size(); ++i) {
+		cout << vvv[i] << ' ';
+	}
 	system("pause");
 	return 0;
 }
 
-void DFSsweep(vector<Node> *List, short n, short v, stack<short> &s) {
+void DFSsweep(vector<Node> *List, int n, int v, stack<int> *s) {
 	char *color = new char[n];
-	for (short i = 0; i < n; ++i) { color[i] = 'w'; }
-	short count = 0;
-	for (short i = 0; i < n; ++i) {
+	for (int i = 0; i < n; ++i) { color[i] = 'w'; }
+	int count = 0;
+	for (int i = 0; i < n; ++i) {
 		if (color[(v + i) % n] == 'w')
 			DFS(List, color, v + i, s, true, count);
 	}
 	return;
 }
 
-void DFSsweep(vector<Node> *List, short n, short v, stack<short> &s, Elem &e) {
+void DFSsweep(vector<Node> *List, int n, int v, stack<int> *s, Elem &e) {
 	char *color = new char[n];
-	for (short i = 0; i < n; ++i) { color[i] = 'w'; }
-	short Temp = 0, idx = 0;
-	while (!s.empty()) {
-		short count = 0;
-		v = s.top();
+	for (int i = 0; i < n; ++i) { color[i] = 'w'; }
+	int Temp = 0;
+	vector<int> idx;
+	while (!s->empty()) {
+		int count = 0;
+		v = s->top();
 		DFS(List, color, v, s, false, count);
 		if (count > Temp) {
 			Temp = count;
-			idx = v;
+			idx.clear();
+			idx.push_back(v);
 		}
+		else if (count == Temp)
+			idx.push_back(v);
 	}
 	e.count = Temp; e.index = idx;
 	return;
 }
 
 
-void DFSsweep2(vector<Node> *List, short n, short v) {
+void DFSsweep2(vector<Node> *List, int n, int v, vector<int> &vec) {
 	char *color = new char[n];
-	for (short i = 0; i < n; ++i) { color[i] = 'w'; }
-	vector<short> vec;
+	for (int i = 0; i < n; ++i) { color[i] = 'w'; }
 	DFS2(List, color, v, vec);
-	sort(vec.begin(), vec.end());
-	for (auto i = 0; i < vec.size(); ++i) {
-		cout << vec[i] << ' ';
-	}
 	return;
 }
 
-void DFS(vector<Node> *List, char *color, short v, stack<short> &s, bool inORout, short &count) {
-	short w;
-	vector<short> remAdj;
+void DFS(vector<Node> *List, char *color, int v, stack<int> *s, bool inORout, int &count) {
+	int w;
+	vector<int> remAdj;
 	// Pre Processing
 
 	color[v] = 'g';
@@ -122,15 +126,15 @@ void DFS(vector<Node> *List, char *color, short v, stack<short> &s, bool inORout
 		remAdj.pop_back();
 	}
 	// Post Processing
-	if (inORout) s.push(v); else { s.pop(); }
+	if (inORout) s->push(v); else { s->pop(); }
 	++count;
 	color[v] = 'b';
 	return;
 }
 
-void DFS2(vector<Node> *List, char *color, short v, vector<short> &vec) {
-	short w;
-	vector<short> remAdj;
+void DFS2(vector<Node> *List, char *color, int v, vector<int> &vec) {
+	int w;
+	vector<int> remAdj;
 	// Pre Processing
 
 	color[v] = 'g';
